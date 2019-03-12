@@ -1,0 +1,44 @@
+{
+    "name": "sar-lambda-janitor",
+    "private": true,
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest --config=jest.config.js",
+        "test:lint": "eslint .",
+        "package": "sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket sar-lambda-janitor",
+        "publish": "sam publish --template packaged.yml --region us-east-1"
+    },
+    "author": "Yan Cui",
+    "license": "MIT",
+    "dependencies": {
+        "aws-sdk": "^2.418.0"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^7.5.2",
+        "@commitlint/config-conventional": "^7.5.0",
+        "coveralls": "^3.0.2",
+        "eslint": "^5.13.0",
+        "eslint-config-standard": "^12.0.0",
+        "eslint-plugin-import": "^2.16.0",
+        "eslint-plugin-node": "^8.0.1",
+        "eslint-plugin-promise": "^4.0.1",
+        "eslint-plugin-standard": "^4.0.0",
+        "husky": "^1.3.1",
+        "jest": "^24.4.0",
+        "lint-staged": "^8.1.4",
+        "lodash": "^4.17.11"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged",
+            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+        }
+    },
+    "lint-staged": {
+        "*.js": [
+            "eslint"
+        ]
+    }
+}

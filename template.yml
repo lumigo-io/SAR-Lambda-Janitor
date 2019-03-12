@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: lambda-janitor
+    Description: Cron job for deleting old, unused versions of Lambda functions to clean up storage space
+    Author: Lumigo
+    SpdxLicenseId: MIT
+    LicenseUrl: LICENSE.txt
+    ReadmeUrl: README.md
+    Labels: ['lambda', 'cron']
+    HomePageUrl: https://github.com/lumigo/SAR-Lambda-Janitor
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/lumigo/SAR-Lambda-Janitor
+
+Resources:
+  Clean:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: functions/clean.handler
+      Runtime: nodejs8.10
+      Timeout: 900
+      Policies:
+        - Statement:
+            Effect: Allow
+            Action:
+              - lambda:DeleteFunction
+              - lambda:List*
+            Resource: "*"
+      Events:
+        CleanScheduledEvent:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 hour)
