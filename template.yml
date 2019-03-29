@@ -21,6 +21,10 @@ Resources:
       Handler: functions/clean.handler
       Runtime: nodejs8.10
       Timeout: 900
+      Environment:
+        Variables:
+          VERSIONS_TO_KEEP:
+            Ref: VersionsToKeep
       Policies:
         - Statement:
             Effect: Allow
@@ -33,3 +37,11 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(1 hour)
+
+Parameters:
+  VersionsToKeep:
+    Type: Number    
+    Description: >
+      How many versions to keep, even if they are not aliased.
+    Default: 3
+    MinValue: 0 # don't keep anything except $Latest
