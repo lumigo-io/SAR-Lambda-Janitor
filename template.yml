@@ -40,8 +40,8 @@ Resources:
 
 Parameters:
   VersionsToKeep:
-    Type: Number    
-    Description: >
+    Type: Number
+    Description: >-
       How many versions to keep, even if they are not aliased.
     Default: 3
     MinValue: 0 # don't keep anything except $Latest
