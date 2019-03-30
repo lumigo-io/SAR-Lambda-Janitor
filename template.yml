@@ -11,7 +11,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['lambda', 'cron']
     HomePageUrl: https://github.com/lumigo/SAR-Lambda-Janitor
-    SemanticVersion: 1.0.0
+    SemanticVersion: 1.1.0
     SourceCodeUrl: https://github.com/lumigo/SAR-Lambda-Janitor
 
 Resources:
