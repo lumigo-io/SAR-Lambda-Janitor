@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const Lambda = require('./lib/lambda')
 
 let functions = []
@@ -28,7 +29,15 @@ const cleanFunc = async (funcArn) => {
   console.log(`cleaning ${funcArn}`)
 
   const aliasedVersions = await Lambda.listAliasedVersions(funcArn)
-  const versions = await Lambda.listVersions(funcArn)
+  let versions = (await Lambda.listVersions(funcArn))
+  // 242, 241, 240, ...
+  versions = _.orderBy(versions, v => parseInt(v), 'desc')
+
+  const versionsToKeep = parseInt(process.env.VERSIONS_TO_KEEP || '3')
+
+  // drop the most recent N versions
+  console.log(`keeping the most recent ${versionsToKeep} versions`)
+  versions = _.drop(versions, versionsToKeep)
 
   for (const version of versions) {
     if (!aliasedVersions.includes(version)) {

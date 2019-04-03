@@ -19,11 +19,15 @@ afterEach(() => {
   mockDeleteVersion.mockClear()
 })
 
-const handler = require('./clean').handler
+const requireHandler = (versionsToKeep) => {
+  process.env.VERSIONS_TO_KEEP = versionsToKeep.toString()
+  return require('./clean').handler
+}
 
 test('when there are no functions, it does nothing', async () => {
   mockListFunctions.mockResolvedValueOnce([])
 
+  const handler = requireHandler(0)
   await handler()
 
   expect(mockListVersions).not.toBeCalled()
@@ -36,6 +40,7 @@ test('all unaliased versions of a function is deleted', async () => {
   mockListVersions.mockResolvedValueOnce(['1', '2', '3'])
   mockListAliasedVersions.mockResolvedValueOnce(['2'])
 
+  const handler = requireHandler(0)
   await handler()
 
   expect(mockDeleteVersion).toHaveBeenCalledTimes(2)
@@ -52,6 +57,7 @@ test('when there are unfinished functions from a previous run, it should carry o
     .mockRejectedValueOnce(new Error('boom!')) // throw on 'b'
 
   // the first invocation failed on b
+  const handler = requireHandler(0)
   await expect(handler()).rejects.toThrow('boom!')
 
   expect(mockDeleteVersion).toBeCalledWith('a', '1')
@@ -66,4 +72,16 @@ test('when there are unfinished functions from a previous run, it should carry o
   // the retry shouldn't call listFunctions again, and carry on from where it failed last time
   expect(mockListFunctions).toHaveBeenCalledTimes(1)
   expect(mockDeleteVersion).toBeCalledWith('b', '1')
+})
+
+test('when configured to do so, keep the most recent versions even if they are not aliased', async () => {
+  mockListFunctions.mockResolvedValueOnce(['keep-versions'])
+  mockListVersions.mockResolvedValueOnce(['1', '2', '3', '4', '5'])
+  mockListAliasedVersions.mockResolvedValueOnce(['2'])
+
+  const handler = requireHandler(3)
+  await handler()
+
+  expect(mockDeleteVersion).toHaveBeenCalledTimes(1)
+  expect(mockDeleteVersion).toBeCalledWith('keep-versions', '1')
 })
