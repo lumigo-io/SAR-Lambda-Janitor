@@ -8,7 +8,7 @@ This [post](https://lumigo.io/blog/a-serverless-application-to-clean-up-old-depl
 
 Go to this [page](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:374852340823:applications~lambda-janitor) and click the `Deploy` button.
 
-![image-20190330111444770](https://github.com/lumigo/SAR-Lambda-Janitor/blob/master/docs/image001.png)
+![image-20190330111444770](https://raw.githubusercontent.com/lumigo/SAR-Lambda-Janitor/master/docs/image001.png)
 
 This app would deploy the following resources to your region:
 
