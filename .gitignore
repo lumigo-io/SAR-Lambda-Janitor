@@ -25,3 +25,5 @@ coverage
 
 # dstore
 .DS_Store
+
+.env
