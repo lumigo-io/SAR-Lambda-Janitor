@@ -1,6 +1,7 @@
 # SAR-Lambda-Janitor
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/lumigo/SAR-Lambda-Janitor.svg)](https://greenkeeper.io/)
+[![CircleCI](https://circleci.com/gh/lumigo/SAR-Lambda-Janitor.svg?style=svg)](https://circleci.com/gh/lumigo/SAR-Lambda-Janitor)
 
 Cron job for deleting old, unused versions of your Function.
 
