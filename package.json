@@ -32,9 +32,9 @@
         "lodash": "^4.17.11"
     },
     "greenkeeper": {
-      "ignore": [
-        "eslint"
-      ]
+        "ignore": [
+            "eslint"
+        ]
     },
     "husky": {
         "hooks": {
