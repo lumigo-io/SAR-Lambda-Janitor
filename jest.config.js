@@ -1,9 +1,9 @@
 module.exports = {
-  collectCoverage: true,
-  coverageReporters: [
-    'text',
-    'html',
-    'lcov'
-  ],
-  testEnvironment: 'node'
-}
+	collectCoverage: true,
+	coverageReporters: [
+		"text",
+		"html",
+		"lcov"
+	],
+	testEnvironment: "node"
+};
