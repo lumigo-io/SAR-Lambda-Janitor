@@ -1,5 +1,7 @@
 # SAR-Lambda-Janitor
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/lumigo/SAR-Lambda-Janitor.svg)](https://greenkeeper.io/)
+
 Cron job for deleting old, unused versions of your Function.
 
 This [post](https://lumigo.io/blog/a-serverless-application-to-clean-up-old-deployment-packages/) explains the problem and why we created this app.
