@@ -10,8 +10,8 @@
         "package": "sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket sar-lambda-janitor",
         "publish": "sam publish --template packaged.yml --region us-east-1"
     },
-    "author": "Yan Cui",
-    "license": "MIT",
+    "author": "Lumigo LTD (https://lumigo.io)",
+    "license": "Apache 2",
     "dependencies": {
         "aws-sdk": "^2.418.0"
     },
