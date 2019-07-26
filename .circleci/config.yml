@@ -30,17 +30,17 @@ workflows:
       - build:
           filters:
             branches:
-              ignore: master
+              ignore: deploy
 
   build_and_deploy:
     jobs:
       - build:
           filters:
             branches:
-              only: master
+              only: deploy
       - deploy:
           requires:
             - build
           filters:
             branches:
-              only: master
+              only: deploy

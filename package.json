@@ -10,13 +10,13 @@
         "package": "sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket sar-lambda-janitor",
         "publish": "sam publish --template packaged.yml --region us-east-1"
     },
-    "author": "Yan Cui",
-    "license": "MIT",
+    "author": "Lumigo LTD (https://lumigo.io)",
+    "license": "Apache 2",
     "dependencies": {
         "aws-sdk": "^2.418.0"
     },
     "devDependencies": {
-        "@commitlint/cli": "^8.0.0",
+        "@commitlint/cli": "^8.1.0",
         "@commitlint/config-conventional": "^8.0.0",
         "coveralls": "^3.0.2",
         "eslint": "^5.13.0",
@@ -29,7 +29,7 @@
         "husky": "^3.0.0",
         "jest": "^24.4.0",
         "lint-staged": "^9.1.0",
-        "lodash": "^4.17.11"
+        "lodash": "^4.17.15"
     },
     "greenkeeper": {
         "ignore": [
