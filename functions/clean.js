@@ -1,12 +1,13 @@
 const _ = require("lodash");
 const Lambda = require("./lib/lambda");
+const log = require("@dazn/lambda-powertools-logger");
 
 let functions = [];
 
 module.exports.handler = async () => {
 	await clean();
 
-	console.log("all done");
+	log.debug("all done");
 };
 
 const clean = async () => {
@@ -17,7 +18,10 @@ const clean = async () => {
 	// clone the functions that are left to do so that as we iterate with it we
 	// can remove cleaned functions from 'functions'
 	const toClean = functions.map(x => x);
-	console.log(`${toClean.length} functions to clean:\n`, toClean);
+	log.debug(`${toClean.length} functions to clean...`, { 
+		functions: toClean, 
+		count: toClean.length 
+	});
 
 	for (const func of toClean) {
 		await cleanFunc(func);
@@ -26,7 +30,7 @@ const clean = async () => {
 };
 
 const cleanFunc = async (funcArn) => {
-	console.log(`cleaning ${funcArn}`);
+	log.debug("cleaning...", { function: funcArn });
 
 	const aliasedVersions = await Lambda.listAliasedVersions(funcArn);
 	let versions = (await Lambda.listVersions(funcArn));
@@ -36,7 +40,7 @@ const cleanFunc = async (funcArn) => {
 	const versionsToKeep = parseInt(process.env.VERSIONS_TO_KEEP || "3");
 
 	// drop the most recent N versions
-	console.log(`keeping the most recent ${versionsToKeep} versions`);
+	log.debug(`keeping the most recent ${versionsToKeep} versions`);
 	versions = _.drop(versions, versionsToKeep);
 
 	for (const version of versions) {

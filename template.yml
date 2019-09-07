@@ -23,6 +23,7 @@ Resources:
       Timeout: 900
       Environment:
         Variables:
+          LOG_LEVEL: INFO
           VERSIONS_TO_KEEP:
             Ref: VersionsToKeep
       Policies:

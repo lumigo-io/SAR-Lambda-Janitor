@@ -1,5 +1,7 @@
 const Lambda = require("./lib/lambda");
 
+console.log = jest.fn();
+
 const mockListFunctions = jest.fn();
 Lambda.listFunctions = mockListFunctions;
 
