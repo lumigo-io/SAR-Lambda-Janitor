@@ -1,8 +1,10 @@
 const AWS = require("./aws");
 const lambda = new AWS.Lambda();
+const _ = require("lodash");
+const log = require("@dazn/lambda-powertools-logger");
 
 const listFunctions = async () => {
-	console.log("listing all available functions...");
+	log.info("listing all available functions...");
 
 	const loop = async (acc = [], marker) => {
 		const params = {
@@ -18,6 +20,7 @@ const listFunctions = async () => {
 			return loop(newAcc, res.NextMarker);
 		} else {
 			// Shuffle newAcc array
+			log.info(`found ${newAcc.length} functions`, { count: newAcc.length });
 			return newAcc.sort(() => Math.random() - Math.random());
 		}
 	};
@@ -26,7 +29,7 @@ const listFunctions = async () => {
 };
 
 const listVersions = async (funcArn) => {
-	console.log(`listing versions: ${funcArn}`);
+	log.debug("listing versions...", { function: funcArn });
 
 	const loop = async (acc = [], marker) => {
 		const params = {
@@ -42,7 +45,7 @@ const listVersions = async (funcArn) => {
 		if (res.NextMarker) {
 			return loop(newAcc, res.NextMarker);
 		} else {
-			console.log("found versions [NOT $LATEST]:\n", newAcc);
+			log.debug("found versions [NOT $LATEST]", { versions: newAcc.join(",") });
 			return newAcc;
 		}
 	};
@@ -51,7 +54,7 @@ const listVersions = async (funcArn) => {
 };
 
 const listAliasedVersions = async (funcArn) => {
-	console.log(`listing aliased versions: ${funcArn}`);
+	log.debug("listing aliased versions...", { function: funcArn });
 
 	const loop = async (acc = [], marker) => {
 		const params = {
@@ -61,14 +64,26 @@ const listAliasedVersions = async (funcArn) => {
 		};
 
 		const res = await lambda.listAliases(params).promise();
-		const versions = res.Aliases.map(x => x.FunctionVersion);
+		const versions = _.flatMap(res.Aliases, alias => {
+			const versions = [alias.FunctionVersion];
+			if (alias.RoutingConfig) {
+				const additionalVersions = Object.keys(alias.RoutingConfig.AdditionalVersionWeights);
+				return versions.concat(additionalVersions);
+			} else {
+				return versions;
+			}
+		});
 		const newAcc = acc.concat(versions);
 
 		if (res.NextMarker) {
 			return loop(newAcc, res.NextMarker);
 		} else {
-			console.log("found aliased versions:\n", newAcc);
-			return newAcc;
+			const uniqueVersions = _.uniq(newAcc);
+			log.debug("found aliased versions", { 
+				count: versions.length, 
+				versions: uniqueVersions.join(",") 
+			});
+			return uniqueVersions;
 		}
 	};
 
@@ -76,7 +91,7 @@ const listAliasedVersions = async (funcArn) => {
 };
 
 const deleteVersion = async (funcArn, version) => {
-	console.log(`deleting [${funcArn}] version [${version}]`);
+	log.info("deleting...", { function: funcArn, version });
 
 	const params = {
 		FunctionName: funcArn,

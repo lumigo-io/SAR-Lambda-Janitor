@@ -1,6 +1,8 @@
 const _ = require("lodash");
 const AWS = require("./aws");
 
+console.log = jest.fn();
+
 const mockListFunctions = jest.fn();
 AWS.Lambda.prototype.listFunctions = mockListFunctions;
 
@@ -59,10 +61,11 @@ test("listVersions gets all versions recursively (but not the $LATEST)", async (
 });
 
 test("listAliasedVersions gets all versions associated with an alias recursively", async () => {
+	let offset = 0;
 	const response = n => ({
 		promise: () => Promise.resolve({
 			Aliases: _.range(0, n).map(() => ({
-				FunctionVersion: "version"
+				FunctionVersion: (offset++).toString()
 			})),
 			NextMarker: n === 10 ? "more.." : undefined
 		})
@@ -74,6 +77,29 @@ test("listAliasedVersions gets all versions associated with an alias recursively
 
 	const functions = await Lambda.listAliasedVersions("some-arn");
 	expect(functions).toHaveLength(21);
+});
+
+test("listAliasedVersions gets additional routed versions as well", async () => {
+	let offset = 0;
+	const response = n => ({
+		promise: () => Promise.resolve({
+			Aliases: _.range(0, n).map(() => ({
+				FunctionVersion: (offset++).toString(),
+				RoutingConfig: {
+					AdditionalVersionWeights: {
+						[offset.toString()]: 0.1
+					}
+				}
+			})),
+			NextMarker: n === 10 ? "more.." : undefined
+		})
+	});
+
+	mockListAliases.mockReturnValueOnce(response(1));
+
+	const functions = await Lambda.listAliasedVersions("some-arn");
+	expect(functions).toHaveLength(2);
+	expect(functions).toEqual(["0", "1"]);
 });
 
 test("deleteVersion does what it says on the tin", async () => {
