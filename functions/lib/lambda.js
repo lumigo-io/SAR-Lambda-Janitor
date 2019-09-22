@@ -1,7 +1,26 @@
-const AWS = require("./aws");
+const AWS = require("aws-sdk");
 const lambda = new AWS.Lambda();
 const _ = require("lodash");
 const log = require("@dazn/lambda-powertools-logger");
+const retry = require("async-retry");
+
+const bailIfErrorNotRetryable = (bail) => (error) => {
+	if (!error.retryable) {
+		bail(error);
+	} else {
+		throw error;
+	}
+};
+
+const getRetryConfig = (onRetry) => (
+	{
+		retries: parseInt(process.env.RETRIES || "5"),
+		minTimeout: parseFloat(process.env.RETRY_MIN_TIMEOUT || "5000"),
+		maxTimeout: parseFloat(process.env.RETRY_MAX_TIMEOUT || "60000"),
+		factor: 2,
+		onRetry
+	}
+);
 
 const listFunctions = async () => {
 	log.info("listing all available functions...");
@@ -12,7 +31,14 @@ const listFunctions = async () => {
 			MaxItems: 10
 		};
 
-		const res = await lambda.listFunctions(params).promise();
+		const res = await retry(
+			(bail) => lambda
+				.listFunctions(params)
+				.promise()
+				.catch(bailIfErrorNotRetryable(bail)),
+			getRetryConfig((err) => {
+				log.warn("retrying listFunctions after error...", err);
+			}));
 		const functions = res.Functions.map(x => x.FunctionArn);
 		const newAcc = acc.concat(functions);
 
@@ -38,7 +64,14 @@ const listVersions = async (funcArn) => {
 			MaxItems: 20
 		};
 
-		const res = await lambda.listVersionsByFunction(params).promise();
+		const res = await retry(
+			(bail) => lambda
+				.listVersionsByFunction(params)
+				.promise()
+				.catch(bailIfErrorNotRetryable(bail)),
+			getRetryConfig((err) => {
+				log.warn("retrying listVersionsByFunction after error...", { function: funcArn }, err);
+			}));
 		const versions = res.Versions.map(x => x.Version).filter(x => x !== "$LATEST");
 		const newAcc = acc.concat(versions);
 
@@ -63,7 +96,14 @@ const listAliasedVersions = async (funcArn) => {
 			MaxItems: 20
 		};
 
-		const res = await lambda.listAliases(params).promise();
+		const res = await retry(
+			(bail) => lambda
+				.listAliases(params)
+				.promise()
+				.catch(bailIfErrorNotRetryable(bail)),
+			getRetryConfig((err) => {
+				log.warn("retrying listAliases after error...", { function: funcArn }, err);
+			}));
 		const versions = _.flatMap(res.Aliases, alias => {
 			const versions = [alias.FunctionVersion];
 			if (alias.RoutingConfig) {
@@ -98,7 +138,14 @@ const deleteVersion = async (funcArn, version) => {
 		Qualifier: version
 	};
 
-	await lambda.deleteFunction(params).promise();
+	await retry(
+		(bail) => lambda
+			.deleteFunction(params)
+			.promise()
+			.catch(bailIfErrorNotRetryable(bail)),
+		getRetryConfig((err) => {
+			log.warn("retrying deleteFunction after error...", { function: funcArn, version }, err);
+		}));
 };
 
 module.exports = {

@@ -26,6 +26,7 @@ Resources:
           LOG_LEVEL: INFO
           VERSIONS_TO_KEEP:
             Ref: VersionsToKeep
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
       Policies:
         - Statement:
             Effect: Allow
