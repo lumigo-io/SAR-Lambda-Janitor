@@ -1,9 +1,9 @@
 # SAR-Lambda-Janitor
 
+[![Version](https://img.shields.io/badge/semver-1.4.0-blue)](template.yml)
 [![Greenkeeper badge](https://badges.greenkeeper.io/lumigo/SAR-Lambda-Janitor.svg)](https://greenkeeper.io/)
 [![CircleCI](https://circleci.com/gh/lumigo/SAR-Lambda-Janitor.svg?style=svg)](https://circleci.com/gh/lumigo/SAR-Lambda-Janitor)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/semver-1.1.2-blue)](template.yml)
 
 Cron job for deleting old, unused versions of your Function.
 
