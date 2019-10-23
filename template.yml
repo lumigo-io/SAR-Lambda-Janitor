@@ -42,7 +42,6 @@ Resources:
 
   LogGroup:
     Type: AWS::Logs::LogGroup
-    Condition: IsKinesis
     Properties:
       LogGroupName: !Sub /aws/lambda/${Clean}
 
