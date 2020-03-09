@@ -4,14 +4,14 @@ Transform: AWS::Serverless-2016-10-31
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: lambda-janitor
-    Description: Cron job for deleting old, unused versions of Lambda functions to clean up storage space
+    Description: Cron job for deleting old, unused versions of Lambda functions and layers to clean up storage space
     Author: Lumigo
     SpdxLicenseId: MIT
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README.md
     Labels: ['lambda', 'cron']
     HomePageUrl: https://github.com/lumigo/SAR-Lambda-Janitor
-    SemanticVersion: 1.5.0
+    SemanticVersion: 2.0.0
     SourceCodeUrl: https://github.com/lumigo/SAR-Lambda-Janitor
 
 Resources:
@@ -26,13 +26,17 @@ Resources:
           LOG_LEVEL: INFO
           VERSIONS_TO_KEEP:
             Ref: VersionsToKeep
+          LAYER_VERSIONS_TO_KEEP:
+            Ref: LayerVersionsToKeep
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
       Policies:
         - Statement:
             Effect: Allow
             Action:
               - lambda:DeleteFunction
+              - lambda:DeleteLayerVersion
               - lambda:List*
+              - lambda:GetFunctionConfiguration
             Resource: "*"
       Events:
         CleanScheduledEvent:
@@ -49,6 +53,12 @@ Parameters:
   VersionsToKeep:
     Type: Number
     Description: >-
-      How many versions to keep, even if they are not aliased.
+      How many function versions to keep, even if they are not aliased.
     Default: 3
     MinValue: 0 # don't keep anything except $Latest
+  LayerVersionsToKeep:
+    Type: Number
+    Description: >-
+      How many layer versions to keep that are not referenced.
+    Default: 3
+    MinValue: 0 # don't keep anything

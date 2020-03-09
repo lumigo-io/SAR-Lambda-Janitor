@@ -54,8 +54,40 @@ const listFunctions = async () => {
 	return loop();
 };
 
+const listLayers = async () => {
+	log.info("listing all available layers...");
+
+	const loop = async (acc = [], marker) => {
+		const params = {
+			Marker: marker,
+			MaxItems: 10
+		};
+
+		const res = await retry(
+			(bail) => lambda
+				.listLayers(params)
+				.promise()
+				.catch(bailIfErrorNotRetryable(bail)),
+			getRetryConfig((err) => {
+				log.warn("retrying listLayers after error...", err);
+			}));
+		const layers = res.Layers.map(x => x.LayerArn);
+		const newAcc = acc.concat(layers);
+
+		if (res.NextMarker) {
+			return loop(newAcc, res.NextMarker);
+		} else {
+			// Shuffle newAcc array
+			log.info(`found ${newAcc.length} layers`, { count: newAcc.length });
+			return newAcc.sort(() => Math.random() - Math.random());
+		}
+	};
+
+	return loop();
+};
+
 const listVersions = async (funcArn) => {
-	log.debug("listing versions...", { function: funcArn });
+	log.debug("listing function versions...", { function: funcArn });
 
 	const loop = async (acc = [], marker) => {
 		const params = {
@@ -86,8 +118,40 @@ const listVersions = async (funcArn) => {
 	return loop();
 };
 
+const listLayerVersions = async (layerArn) => {
+	log.debug("listing layer versions...", { function: layerArn });
+
+	const loop = async (acc = [], marker) => {
+		const params = {
+			LayerName: layerArn,
+			Marker: marker,
+			MaxItems: 20
+		};
+
+		const res = await retry(
+			(bail) => lambda
+				.listLayerVersions(params)
+				.promise()
+				.catch(bailIfErrorNotRetryable(bail)),
+			getRetryConfig((err) => {
+				log.warn("retrying listLayerVersions after error...", { layer: layerArn }, err);
+			}));
+		const versions = res.LayerVersions.map(x => x.LayerVersionArn);
+		const newAcc = acc.concat(versions);
+
+		if (res.NextMarker) {
+			return loop(newAcc, res.NextMarker);
+		} else {
+			log.debug("found versions ", { versions: newAcc.join(",") });
+			return newAcc;
+		}
+	};
+
+	return loop();
+};
+
 const listAliasedVersions = async (funcArn) => {
-	log.debug("listing aliased versions...", { function: funcArn });
+	log.debug("listing aliased function versions...", { function: funcArn });
 
 	const loop = async (acc = [], marker) => {
 		const params = {
@@ -120,8 +184,8 @@ const listAliasedVersions = async (funcArn) => {
 		} else {
 			const uniqueVersions = _.uniq(newAcc);
 			log.debug("found aliased versions", { 
-				count: versions.length, 
-				versions: uniqueVersions.join(",") 
+				count: versions.length,
+				versions: uniqueVersions.join(",")
 			});
 			return uniqueVersions;
 		}
@@ -130,8 +194,54 @@ const listAliasedVersions = async (funcArn) => {
 	return loop();
 };
 
+const listLayerVersionsByAlias = async (funcArn) => {
+	log.debug("listing referenced layer versions by alias...", { function: funcArn });
+
+	const params = {
+		FunctionName: funcArn
+	};
+
+	const res = await retry(
+		(bail) => lambda
+			.getFunctionConfiguration(params)
+			.promise()
+			.catch(bailIfErrorNotRetryable(bail)),
+		getRetryConfig((err) => {
+			log.warn("retrying getFunctionConfiguration after error...", { function: funcArn }, err);
+		}));
+	let layerVersions = [];
+	if (res.Layers) {
+		layerVersions = res.Layers.map(layer => layer.Arn);
+	}
+	log.debug("found layer versions", {
+		versions: layerVersions.join(",")
+	});
+	return layerVersions;
+};
+
+const listLayerVersionsByFunction = async (funcArn) => {
+	log.debug("listing referenced layer versions by function...", { function: funcArn });
+
+	const aliasedVersions = await listAliasedVersions(funcArn);
+
+	let layerVersions = [];
+
+	for(let aliasedVersion of aliasedVersions) {
+		const aliasedVersionArn = funcArn + ":" + aliasedVersion;
+		const versions = await listLayerVersionsByAlias(aliasedVersionArn);
+		layerVersions = layerVersions.concat(versions);
+	}
+
+	const uniqueVersions = _.uniq(layerVersions);
+	log.debug("found layer versions", {
+		count: layerVersions.length,
+		versions: uniqueVersions.join(",")
+	});
+	return uniqueVersions;
+};
+
 const deleteVersion = async (funcArn, version) => {
-	log.info("deleting...", { function: funcArn, version });
+	log.info("deleting function version...", { function: funcArn, version });
 
 	const params = {
 		FunctionName: funcArn,
@@ -148,9 +258,31 @@ const deleteVersion = async (funcArn, version) => {
 		}));
 };
 
+const deleteLayerVersion = async (layerArn, version) => {
+	log.info("deleting layer function version...", { layer: layerArn, version });
+
+	const params = {
+		LayerName: layerArn,
+		VersionNumber: version
+	};
+
+	await retry(
+		(bail) => lambda
+			.deleteLayerVersion(params)
+			.promise()
+			.catch(bailIfErrorNotRetryable(bail)),
+		getRetryConfig((err) => {
+			log.warn("retrying deleteLayerVersion after error...", { function: layerArn, version }, err);
+		}));
+};
+
 module.exports = {
 	listFunctions,
+	listLayers,
 	listVersions,
+	listLayerVersions,
 	listAliasedVersions,
-	deleteVersion
+	listLayerVersionsByFunction,
+	deleteVersion,
+	deleteLayerVersion
 };
