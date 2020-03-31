@@ -194,7 +194,7 @@ const listAliasedVersions = async (funcArn) => {
 	return loop();
 };
 
-const listLayerVersionsByAlias = async (funcArn) => {
+const listLayerVersionsByFnVersion = async (funcArn) => {
 	log.debug("listing referenced layer versions by alias...", { function: funcArn });
 
 	const params = {
@@ -222,13 +222,17 @@ const listLayerVersionsByAlias = async (funcArn) => {
 const listLayerVersionsByFunction = async (funcArn) => {
 	log.debug("listing referenced layer versions by function...", { function: funcArn });
 
-	const aliasedVersions = await listAliasedVersions(funcArn);
+	let fnVersions = await listVersions(funcArn);
+	fnVersions = fnVersions.concat(["$LATEST"]);
 
 	let layerVersions = [];
 
-	for(let aliasedVersion of aliasedVersions) {
-		const aliasedVersionArn = funcArn + ":" + aliasedVersion;
-		const versions = await listLayerVersionsByAlias(aliasedVersionArn);
+	for(let fnVersion of fnVersions) {
+		let fnVersionArn = funcArn;
+		if( fnVersion !== "$LATEST" ) {
+			fnVersionArn += ":" + fnVersion;
+		}
+		let versions = await listLayerVersionsByFnVersion(fnVersionArn);
 		layerVersions = layerVersions.concat(versions);
 	}
 

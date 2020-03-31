@@ -135,13 +135,11 @@ test("listAliasedVersions gets additional routed versions as well", async () => 
 });
 
 test("listLayerVersionsByFunction gets all layer versions associated with a function", async () => {
-	let offsetFunction = 0;
-	const aliases = n => _.range(0, n).map(() => ({
-		FunctionVersion: (offsetFunction++).toString()
+	const versions = n => _.range(0, n).map(m => ({
+		Version: n < 10 && m === n - 1 ? "$LATEST" : "version"
 	}));
 
-	givenListAliasesReturns(aliases(3));
-
+	givenListVersionsReturns(versions(3));
 
 	let offsetLayer = 0;
 	const layers = n => _.range(0, n).map(() => ({
@@ -224,7 +222,7 @@ describe("error handling", () => {
 	});
 
 	test("should retry getFunctionConfiguration when it errs", async () => {
-		givenListAliasesReturns([{ Alias: "$LATEST" }]);
+		givenListVersionsReturns([{ Version: "$LATEST" }]);
 		givenGetFunctionConfigurationFailsWith("ThrottlingException", "Rate Limited");
 		givenGetFunctionConfigurationReturns([{ Arn: "some-arn:1" }]);
 
