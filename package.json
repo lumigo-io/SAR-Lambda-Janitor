@@ -15,7 +15,7 @@
     "dependencies": {
         "@dazn/lambda-powertools-logger": "^1.9.0",
         "async-retry": "^1.2.3",
-        "aws-sdk": "^2.533.0"
+        "aws-sdk": "^2.688.0"
     },
     "devDependencies": {
         "@commitlint/cli": "^8.1.0",
