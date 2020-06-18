@@ -5,6 +5,12 @@ jspm_packages
 # Serverless directories
 .serverless
 
+# SAM directories
+.aws-sam
+
+# SAM config
+samconfig.toml
+
 # packaged.yml
 packaged.yml
 

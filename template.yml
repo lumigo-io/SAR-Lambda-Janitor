@@ -38,7 +38,7 @@ Resources:
         CleanScheduledEvent:
           Type: Schedule
           Properties:
-            Schedule: rate(1 hour)
+            Schedule: !Ref CleanSchedule
 
   LogGroup:
     Type: AWS::Logs::LogGroup
@@ -52,3 +52,8 @@ Parameters:
       How many versions to keep, even if they are not aliased.
     Default: 3
     MinValue: 0 # don't keep anything except $Latest
+  CleanSchedule:
+    Type: String
+    Description: >-
+      How often you would like to run the clean Lambda function.
+    Default: rate(1 hour)
