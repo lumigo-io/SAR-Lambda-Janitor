@@ -39,7 +39,10 @@ AutoDeployMyAwesomeLambdaLayer:
       SemanticVersion: <enter latest version>
     Parameters:
       VersionsToKeep: <defaults to 3>
+      CleanSchedule: <defaults to rate(1 hour)>
 ```
+
+The CleanSchedule parameter supports any Schedule Expression for a CloudWatch event. The default uses a rate expression that will execute hourly, however you can easily specify any desired number of minutes/hours/days between runs or use a cron expression. Examples: `rate(12 hours)` or `rate(1 day)`. More details on valid options can be found on the [Amazon CloudWatch Events website](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html).
 
 To do the same via CloudFormation or the Serverless framework, you need to first add the following `Transform`:
 
