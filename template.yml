@@ -38,7 +38,7 @@ Resources:
         CleanScheduledEvent:
           Type: Schedule
           Properties:
-            Schedule: rate(1 hour)
+            Schedule: !Ref CleanSchedule
 
   LogGroup:
     Type: AWS::Logs::LogGroup
@@ -46,6 +46,13 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${Clean}
 
 Parameters:
+  CleanSchedule:
+    Type: String
+    Description: >-
+      How frequently to run the janitor, as an EventBridge schedule expression.
+      https://docs.aws.amazon.com/eventbridge/latest/userguide/scheduled-events.html
+    Default: rate(1 hour)
+
   VersionsToKeep:
     Type: Number
     Description: >-
