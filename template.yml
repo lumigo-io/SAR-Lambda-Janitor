@@ -44,6 +44,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${Clean}
+      RetentionInDays: !Ref LogRetentionInDays
 
 Parameters:
   CleanSchedule:
@@ -52,6 +53,13 @@ Parameters:
       How frequently to run the janitor, as an EventBridge schedule expression.
       https://docs.aws.amazon.com/eventbridge/latest/userguide/scheduled-events.html
     Default: rate(1 hour)
+
+  LogRetentionInDays:
+    Type: Number
+    Description: >-
+      How long to retain the execution logs for the janitor.
+    Default: 14
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653]
 
   VersionsToKeep:
     Type: Number
