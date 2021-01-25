@@ -38,7 +38,8 @@ Resources:
         CleanScheduledEvent:
           Type: Schedule
           Properties:
-            Schedule: rate(1 hour)
+            Schedule:
+              Ref: ExecutionSchedule
 
   LogGroup:
     Type: AWS::Logs::LogGroup
@@ -52,3 +53,8 @@ Parameters:
       How many versions to keep, even if they are not aliased.
     Default: 3
     MinValue: 0 # don't keep anything except $Latest
+  ExecutionSchedule:
+    Type: String
+    Description: >-
+      Schedule expression to describe how often the janitor should run.
+    Default: rate(1 hour)
