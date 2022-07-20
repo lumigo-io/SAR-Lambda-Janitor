@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 jobs:
   build:
@@ -21,26 +21,33 @@ jobs:
       - run: pip install aws-sam-cli
       - run: npm ci
       - run: npm run package
-      - run: npm run publish
+      - run: npm run deploy
 
 workflows:
-  version: 2
-  build:
+  build-deploy:
     jobs:
-      - build:
-          filters:
-            branches:
-              ignore: deploy
-
-  build_and_deploy:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: deploy
+      - build
       - deploy:
+          name: deploy-stag
+          context: stag
           requires:
             - build
           filters:
             branches:
-              only: deploy
+              only: develop
+      - deploy:
+          name: deploy-sand
+          context: sand
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - deploy:
+          name: deploy-prod
+          context: prod
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
