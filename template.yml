@@ -39,6 +39,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(1 hour)
+      Role: !If [ HasRoleArn, !Ref RoleArn, !Ref 'AWS::NoValue']
 
   LogGroup:
     Type: AWS::Logs::LogGroup
@@ -46,9 +47,16 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${Clean}
 
 Parameters:
+  RoleArn:
+    Type: String
+    Description: >-
+      (CloudFormation compatibility) ARN of an IAM role to use as this function's execution role.
   VersionsToKeep:
     Type: Number
     Description: >-
       How many versions to keep, even if they are not aliased.
     Default: 3
     MinValue: 0 # don't keep anything except $Latest
+
+Conditions:
+  HasRoleArn: !Not [!Equals [!Ref RoleArn, ""]]
