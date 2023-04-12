@@ -26,6 +26,8 @@ Resources:
           LOG_LEVEL: INFO
           VERSIONS_TO_KEEP:
             Ref: VersionsToKeep
+          NOOP:
+            Ref: NoOp
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
       Policies:
         - Statement:
@@ -52,3 +54,7 @@ Parameters:
       How many versions to keep, even if they are not aliased.
     Default: 3
     MinValue: 0 # don't keep anything except $Latest
+  NoOp:
+    Type: String
+    Description: Set to `TRUE`, `YES`, or `1` to perform no-operation runs
+    Default: ""
