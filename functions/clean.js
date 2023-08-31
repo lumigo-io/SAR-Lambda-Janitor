@@ -10,6 +10,16 @@ module.exports.handler = async () => {
 	log.debug("all done");
 };
 
+const isEnvTrue = (envVal) => {
+	if (!envVal){return false;}
+	const parsedI = parseInt(envVal, 10);
+	if (! isNaN(parsedI)) {return parsedI >= 1;}
+	if (["t", "true", "y", "yes"].includes(envVal.toLowerCase())){
+	  return true;
+	}
+	return false;
+};
+
 const clean = async () => {
 	if (functions.length === 0) {
 		functions = await Lambda.listFunctions();
@@ -38,6 +48,7 @@ const cleanFunc = async (funcArn) => {
 	versions = _.orderBy(versions, v => parseInt(v), "desc");
 
 	const versionsToKeep = parseInt(process.env.VERSIONS_TO_KEEP || "3");
+	const noop = isEnvTrue(process.env.NOOP);
 
 	// drop the most recent N versions
 	log.debug(`keeping the most recent ${versionsToKeep} versions`);
@@ -45,7 +56,11 @@ const cleanFunc = async (funcArn) => {
 
 	for (const version of versions) {
 		if (!aliasedVersions.includes(version)) {
-			await Lambda.deleteVersion(funcArn, version);
+			if (noop) {
+				console.log(`NOOP: would have attempted to delete function ${funcArn} version ${version}`);
+			} else {
+				await Lambda.deleteVersion(funcArn, version);
+			}
 		}
 	}
 };

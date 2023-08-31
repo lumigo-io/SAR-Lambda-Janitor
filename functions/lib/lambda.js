@@ -139,10 +139,14 @@ const deleteVersion = async (funcArn, version) => {
 	};
 
 	await retry(
-		(bail) => lambda
-			.deleteFunction(params)
-			.promise()
-			.catch(bailIfErrorNotRetryable(bail)),
+		(bail) => {
+			const res = lambda
+				.deleteFunction(params)
+				.promise()
+				.catch(bailIfErrorNotRetryable(bail));
+			log.info("deleted Lambda function version", {function: funcArn,});
+			return res;
+		},
 		getRetryConfig((err) => {
 			log.warn("retrying deleteFunction after error...", { function: funcArn, version }, err);
 		}));

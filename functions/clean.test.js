@@ -1,3 +1,4 @@
+const { isNull } = require("lodash");
 const Lambda = require("./lib/lambda");
 
 console.log = jest.fn();
@@ -21,8 +22,13 @@ afterEach(() => {
 	mockDeleteVersion.mockClear();
 });
 
-const requireHandler = (versionsToKeep) => {
+const requireHandler = (versionsToKeep, noop=null) => {
 	process.env.VERSIONS_TO_KEEP = versionsToKeep.toString();
+	if (! isNull(noop)) {
+		process.env.NOOP = noop.toString();
+	} else {
+		delete process.env.NOOP;
+	}
 	return require("./clean").handler;
 };
 
@@ -36,6 +42,45 @@ test("when there are no functions, it does nothing", async () => {
 	expect(mockListAliasedVersions).not.toBeCalled();
 	expect(mockDeleteVersion).not.toBeCalled();
 });
+
+const noopCases = [
+	{env: "True", run_expected: false},
+	{env: "true", run_expected: false},
+	{env: "yes", run_expected: false},
+	{env: "T", run_expected: false},
+	{env: "t", run_expected: false},
+	{env: "Y", run_expected: false},
+	{env: "y", run_expected: false},
+	{env: "1", run_expected: false},
+	{env: "13", run_expected: false},
+	{env: "False", run_expected: true},
+	{env: "Ture", run_expected: true},
+	{env: "", run_expected: true},
+	{env: "0", run_expected: true},
+	{env: "zzzzzz09ijasdflk23l", run_expected: true}
+];
+
+test.each(noopCases)(
+	"Noop prevents deletion %s",
+	async (test_case) => {
+		
+		mockListFunctions.mockResolvedValueOnce(["a"]);
+		mockListVersions.mockResolvedValueOnce(["1", "2", "3"]);
+		mockListAliasedVersions.mockResolvedValueOnce([]);
+		
+		const handler = requireHandler(1, test_case.env);
+		await handler();
+
+		if (test_case.run_expected) {
+			expect(mockDeleteVersion).toHaveBeenCalledTimes(2);
+			expect(mockDeleteVersion).toBeCalledWith("a", "1");
+			expect(mockDeleteVersion).toBeCalledWith("a", "2");
+		} else {
+			expect(mockDeleteVersion).not.toBeCalled();
+		}
+	}
+	
+);
 
 test("all unaliased versions of a function is deleted", async () => {
 	mockListFunctions.mockResolvedValueOnce(["a"]);
