@@ -28,7 +28,7 @@ const listFunctions = async () => {
 	const loop = async (acc = [], marker) => {
 		const params = {
 			Marker: marker,
-			MaxItems: 10
+			MaxItems: parseInt(process.env.MAX_ITEM || "10"),
 		};
 
 		const res = await retry(
