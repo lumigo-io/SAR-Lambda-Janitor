@@ -15,21 +15,21 @@
     "dependencies": {
         "@dazn/lambda-powertools-logger": "^1.9.0",
         "async-retry": "^1.2.3",
-        "aws-sdk": "^2.814.0"
+        "aws-sdk": "^2.1692.0"
     },
     "devDependencies": {
         "@commitlint/cli": "^8.1.0",
         "@commitlint/config-conventional": "^8.0.0",
         "coveralls": "^3.0.2",
-        "eslint": "^5.13.0",
-        "eslint-config-prettier": "^6.0.0",
+        "eslint": "^9.16.0",
+        "eslint-config-prettier": "^9.1.0",
         "eslint-config-standard": "^14.0.0",
-        "eslint-plugin-import": "^2.16.0",
-        "eslint-plugin-node": "^11.0.0",
-        "eslint-plugin-promise": "^4.0.1",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-promise": "^7.2.1",
         "eslint-plugin-standard": "^4.0.0",
         "husky": "^3.0.0",
-        "jest": "^24.4.0",
+        "jest": "^29.7.0",
         "lint-staged": "^10.0.3",
         "lodash": "^4.17.21"
     },
