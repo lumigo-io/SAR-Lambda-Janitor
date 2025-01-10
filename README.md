@@ -1,6 +1,6 @@
 # SAR-Lambda-Janitor
 
-[![Version](https://img.shields.io/badge/semver-1.5.0-blue)](template.yml)
+[![Version](https://img.shields.io/badge/semver-1.6.2-blue)](template.yml)
 [![Greenkeeper badge](https://badges.greenkeeper.io/lumigo/SAR-Lambda-Janitor.svg)](https://greenkeeper.io/)
 [![CircleCI](https://circleci.com/gh/lumigo-io/SAR-Lambda-Janitor.svg?style=svg)](https://circleci.com/gh/lumigo/SAR-Lambda-Janitor)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
@@ -9,6 +9,9 @@ Cron job for deleting old, unused versions of your Function.
 
 This [post](https://lumigo.io/blog/a-serverless-application-to-clean-up-old-deployment-packages/) explains the problem and why we created this app.
 
+## Forked!
+* **I Forked this from lumigo's original to add some much needed features.**
+
 ## Safeguards
 
 To guard against deleting live versions, some safeguards are in place:
@@ -16,6 +19,8 @@ To guard against deleting live versions, some safeguards are in place:
 * **Never delete the $LATEST version**. This is the default version that will be used when you invoke a function.
 * **Never delete versions that are  referenced by an alias**. If you use aliases to manage different stages - dev, staging, etc. then the latest version referenced by your aliases will not be deleted.
 * **Keeping the most recent N versions**. Even if you don't use aliases at all, we will always keep the most recent N versions, where N can be configured with the `VersionsToKeep` parameter when you install the app. **Defaults to 3**.
+* **Dry-Run** enabled by default. Add ENV variable dryRun = false to enable deletions. 
+* **Delay Value** Env variable configured delay in MS to avoid API "too many requests" errors. Defaults to 10ms - adjust as needed if you have *large* numbers of lambdas and versions. 
 
 ## Deploying to your account (via the console)
 
@@ -35,7 +40,7 @@ AutoDeployMyAwesomeLambdaLayer:
   Type: AWS::Serverless::Application
   Properties:
     Location:
-      ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/lambda-janitor
+      ApplicationId: arn:aws:serverlessrepo:us-east-1:658153742417:applications/lambda-janitor
       SemanticVersion: <enter latest version>
     Parameters:
       VersionsToKeep: <defaults to 3>
