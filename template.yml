@@ -4,28 +4,33 @@ Transform: AWS::Serverless-2016-10-31
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: lambda-janitor
-    Description: Cron job for deleting old, unused versions of Lambda functions to clean up storage space
-    Author: Lumigo
+    Description: Cron job for deleting old, unused versions of Lambda functions to clean up storage space - now with dryRun and delay!
+    Author: Lumigo-Beta0
     SpdxLicenseId: MIT
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README.md
     Labels: ['lambda', 'cron']
-    HomePageUrl: https://github.com/lumigo/SAR-Lambda-Janitor
-    SemanticVersion: 1.6.1
-    SourceCodeUrl: https://github.com/lumigo/SAR-Lambda-Janitor
+    HomePageUrl: https://github.com/chewiedog/SAR-Lambda-Janitor
+    SemanticVersion: 1.6.2
+    SourceCodeUrl: https://github.com/chewiedog/SAR-Lambda-Janitor
 
 Resources:
   Clean:
     Type: AWS::Serverless::Function
     Properties:
       Handler: functions/clean.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs22.x
       Timeout: 900
       Environment:
         Variables:
-          LOG_LEVEL: INFO
+          LOG_LEVEL:
+            Ref: LogLevel
           VERSIONS_TO_KEEP:
             Ref: VersionsToKeep
+          dryRun:
+            Ref: dryRun
+          DELAY_VALUE:
+            Ref: DelayValue
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
       Policies:
         - Statement:
@@ -52,3 +57,17 @@ Parameters:
       How many versions to keep, even if they are not aliased.
     Default: 3
     MinValue: 0 # don't keep anything except $Latest
+  dryRun:
+    Type: String
+    Description: >-
+      'true' just show output, 'false' actually delete versions
+  DelayValue:
+    Type: Number
+    Description: >-
+      The amount in MS to delay list(Function/Alias) calls to avoid API limits.
+    Default: 30
+  LogLevel:
+    Type: String
+    Description: >-
+      Set to DEBUG when dryRun is true to see explicit action information.
+    Default: DEBUG
