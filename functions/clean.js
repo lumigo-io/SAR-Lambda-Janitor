@@ -1,6 +1,10 @@
 const _ = require("lodash");
 const Lambda = require("./lib/lambda");
 const log = require("@dazn/lambda-powertools-logger");
+// delay value in MS in order to avoid "too many requests" API errors
+const delayVal = process.env.DELAY_VALUE || 10;
+
+log.debug(delayVal ? `Delay Value: ${delayVal}` : "Delay Value: Disabled");
 
 let functions = [];
 
@@ -9,6 +13,20 @@ module.exports.handler = async () => {
 
 	log.debug("all done");
 };
+
+// check dryRun enabled.
+const parseBool = (value) => {
+	if (value === 'true' || value === '1') {
+	  return true;
+	} else if (value === 'false' || value === '0') {
+	  return false;
+	} else {
+	  // Handle invalid values or throw an error if needed
+	  return false; // Default to false if invalid
+	}
+  };
+const dryRun = parseBool(process.env.dryRun || true);
+log.warn(dryRun ? "Dry-Run: ENABLED" : "Dry-Run: DISABLED");
 
 const clean = async () => {
 	if (functions.length === 0) {
@@ -32,8 +50,8 @@ const clean = async () => {
 const cleanFunc = async (funcArn) => {
 	log.debug("cleaning...", { function: funcArn });
 
-	const aliasedVersions = await Lambda.listAliasedVersions(funcArn);
-	let versions = (await Lambda.listVersions(funcArn));
+	const aliasedVersions = await Lambda.listAliasedVersions(funcArn, delayVal);
+	let versions = (await Lambda.listVersions(funcArn, delayVal));
 	// 242, 241, 240, ...
 	versions = _.orderBy(versions, v => parseInt(v), "desc");
 
@@ -45,7 +63,7 @@ const cleanFunc = async (funcArn) => {
 
 	for (const version of versions) {
 		if (!aliasedVersions.includes(version)) {
-			await Lambda.deleteVersion(funcArn, version);
+			await Lambda.deleteVersion(funcArn, version, dryRun);
 		}
 	}
 };

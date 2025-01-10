@@ -3,6 +3,8 @@ const lambda = new AWS.Lambda();
 const _ = require("lodash");
 const log = require("@dazn/lambda-powertools-logger");
 const retry = require("async-retry");
+// Delay function
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const bailIfErrorNotRetryable = (bail) => (error) => {
 	if (!error.retryable) {
@@ -54,7 +56,7 @@ const listFunctions = async () => {
 	return loop();
 };
 
-const listVersions = async (funcArn) => {
+const listVersions = async (funcArn, delayVal = 10) => {
 	log.debug("listing versions...", { function: funcArn });
 
 	const loop = async (acc = [], marker) => {
@@ -63,6 +65,9 @@ const listVersions = async (funcArn) => {
 			Marker: marker,
 			MaxItems: 20
 		};
+
+		// Introduce delay before making the API request
+		await delay(delayVal); // Adjust the delay (in milliseconds) as needed
 
 		const res = await retry(
 			(bail) => lambda
@@ -86,7 +91,7 @@ const listVersions = async (funcArn) => {
 	return loop();
 };
 
-const listAliasedVersions = async (funcArn) => {
+const listAliasedVersions = async (funcArn, delayVal = 10) => {
 	log.debug("listing aliased versions...", { function: funcArn });
 
 	const loop = async (acc = [], marker) => {
@@ -95,7 +100,8 @@ const listAliasedVersions = async (funcArn) => {
 			Marker: marker,
 			MaxItems: 20
 		};
-
+        // Introduce delay before making the API request
+		await delay(delayVal); // Adjust the delay (in milliseconds) as needed
 		const res = await retry(
 			(bail) => lambda
 				.listAliases(params)
@@ -130,8 +136,13 @@ const listAliasedVersions = async (funcArn) => {
 	return loop();
 };
 
-const deleteVersion = async (funcArn, version) => {
-	log.info("deleting...", { function: funcArn, version });
+const deleteVersion = async (funcArn, version, dryRun = true) => {
+	log.info(dryRun ? "dry run: would delete..." : "deleting...", { function: funcArn, version });
+
+	if (dryRun) {
+		// If dryRun is true, just log and return without making the API call
+		return;
+	}
 
 	const params = {
 		FunctionName: funcArn,
