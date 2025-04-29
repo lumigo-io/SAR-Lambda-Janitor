@@ -15,8 +15,7 @@
       let
         pkgs = nixpkgs.legacyPackages."${system}";
         ciDeps = with pkgs; [
-          nodejs
-          nodePackages.prettier
+          nodejs_22
         ];
       in
       {
