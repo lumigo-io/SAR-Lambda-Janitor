@@ -27,3 +27,6 @@ coverage
 .DS_Store
 
 .env
+
+.envrc
+.direnv
