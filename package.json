@@ -7,7 +7,7 @@
     "scripts": {
         "test": "jest --config=jest.config.js",
         "test:lint": "eslint .",
-        "package": "sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket sar-lambda-janitor",
+        "package": "sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket sar-lambda-janitor --region us-east-1",
         "publish": "sam publish --template packaged.yml --region us-east-1"
     },
     "author": "Lumigo LTD (https://lumigo.io)",
