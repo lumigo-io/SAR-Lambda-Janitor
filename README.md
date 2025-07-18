@@ -47,4 +47,11 @@ To do the same via CloudFormation or the Serverless framework, you need to first
 Transform: AWS::Serverless-2016-10-31
 ```
 
+then specify a role to be used by our `AWS::Lambda::Function`:
+
+```yml
+    Parameters:
+      RoleArn: "arn:aws:iam::111111111111:role/MyRole"
+```
+
 For more details, read this [post](https://theburningmonk.com/2019/05/how-to-include-serverless-repository-apps-in-serverless-yml/).
