@@ -9,6 +9,13 @@ Cron job for deleting old, unused versions of your Function.
 
 This [post](https://lumigo.io/blog/a-serverless-application-to-clean-up-old-deployment-packages/) explains the problem and why we created this app.
 
+## No-Op (no operation, or, dry run) mode
+
+To do dry runs of this app, the environment variable NOOP can be set using the 
+`NoOp` parameter. NoOp will be considered `true` (no active run) if `NoOp` is:
+  * a string that is in the array `["true", "t", "yes", "y"]` when lower-cased
+  * a string that casts to an int >= 1
+
 ## Safeguards
 
 To guard against deleting live versions, some safeguards are in place:
@@ -39,6 +46,7 @@ AutoDeployMyAwesomeLambdaLayer:
       SemanticVersion: <enter latest version>
     Parameters:
       VersionsToKeep: <defaults to 3>
+      NoOp: <optional, defaults to "", i.e. False (do active run)>
 ```
 
 To do the same via CloudFormation or the Serverless framework, you need to first add the following `Transform`:
