@@ -18,9 +18,9 @@ const clean = async () => {
 	// clone the functions that are left to do so that as we iterate with it we
 	// can remove cleaned functions from 'functions'
 	const toClean = functions.map(x => x);
-	log.debug(`${toClean.length} functions to clean...`, { 
-		functions: toClean, 
-		count: toClean.length 
+	log.debug(`${toClean.length} functions to clean...`, {
+		functions: toClean,
+		count: toClean.length
 	});
 
 	for (const func of toClean) {
@@ -32,8 +32,7 @@ const clean = async () => {
 const cleanFunc = async (funcArn) => {
 	log.debug("cleaning...", { function: funcArn });
 
-	const aliasedVersions = await Lambda.listAliasedVersions(funcArn);
-	let versions = (await Lambda.listVersions(funcArn));
+	let [aliasedVersions, versions] = await Promise.all([Lambda.listAliasedVersions(funcArn), Lambda.listVersions(funcArn)]);
 	// 242, 241, 240, ...
 	versions = _.orderBy(versions, v => parseInt(v), "desc");
 
